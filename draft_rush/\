@@ -1,0 +1,161 @@
+
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+
+void ft_putstr(char *str)
+{
+	int i = 0;
+	while (str[i])
+	{
+		write(1, &str[i], 1);
+		i++;
+	}
+}
+
+
+int	ft_is_in_charset(char c, char *charset)
+{
+	int	i;
+
+	i = 0;
+	while (charset[i])
+	{
+		if (c == charset[i])
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
+char	*ft_strncpy(char *dest, char *src, unsigned int n)
+{
+	unsigned int	ctr;
+
+	ctr = 0;
+	while (ctr < (n - 1) && src[ctr] != '\0')
+	{
+		dest[ctr] = src[ctr];
+		ctr++;
+	}
+	while (ctr < n)
+	{
+		dest[ctr] = '\0';
+		ctr++;
+	}
+	return (dest);
+}
+
+int	calc_sub_string_len(char *str, char *charset)
+{
+	int	i;
+	int	nbr;
+
+	i = 0;
+	nbr = 0;
+	while (str[i])
+	{
+		while (str[i] && ft_is_in_charset(str[i], charset) == 0)
+			++i;
+		if (i)
+			nbr++;
+		while (str[i] && ft_is_in_charset(str[i], charset))
+			i++;
+	}
+	return (nbr);
+}
+
+int	fill(char **res, char *str, int len, char *charset)
+{
+	int	i;
+	int	ctr;
+
+	i = -1;
+	ctr = 0;
+	while (++i < len)
+	{
+		while (*str && ft_is_in_charset(*str, charset))
+			str++;
+		while (str[ctr] && ft_is_in_charset(str[ctr], charset) == 0)
+			ctr++;
+		if (!ctr)
+			continue ;
+		res[i] = (char *) malloc(sizeof(char) * (ctr + 1));
+		if (! res[i])
+			return (0);
+		ft_strncpy(res[i], str, ctr + 1);
+		str += ctr;
+		while (*str && ft_is_in_charset(*str, charset))
+			str++;
+		ctr = 0;
+	}
+		res[len] = 0;
+	return (1);
+}
+
+char	**ft_split(char *str, char *charset)
+{
+	int		len;
+	char	**res;
+
+	len = calc_sub_string_len(str, charset);
+	res = (char **) malloc(sizeof(char *) * (len + 1));
+	if (! res)
+		return (0);
+	if (! fill(res, str, len, charset))
+		return (0);
+//	printf("\nlen of split: %d, last pointer %d", len, res[len]);
+	return (res);
+}
+
+char **create_dict()
+{
+	int size = 200;
+	char *result = (char *) malloc(sizeof(char) * size);
+	int i = 0;
+	char *fd = "./dico.txt"; 
+	int k = open(fd, S_IRGRP | S_IRUSR);
+
+	while(1)
+	{
+	if (i == size)
+		{
+			char *tmp = (char *) malloc(sizeof(char) * size);
+			strcpy(result, tmp);
+			free (result);
+			size += 100;
+			result =  (char *) malloc(sizeof(char) * size);
+			strcpy(tmp, result);
+			free (tmp);
+		}
+	read(k, &result[i], 1);
+//	printf("\nchar: %c, val %d",  result[i], result[i]);	
+//	printf("\ni: %d", i);	
+	if(result[i] == 0)
+		break;i++;
+	}
+	char **all_lines = ft_split(result, "\n");
+	int j = 0;
+//	while(all_lines[j])
+//	{
+//		char *line = all_lines[j];
+//		printf("\nline: %s", line);
+//		j++;	
+//	}
+	return (all_lines);
+}
+
+int main()
+{
+	char **dico;
+	int i = 0;
+	int k = 0;
+	dico = create_dict();
+	typedef struct dictionnaire
+	{
+		char	*inb_str;
+		char	*nb_out;
+		int		nb_int;
+	}dico;
+}
